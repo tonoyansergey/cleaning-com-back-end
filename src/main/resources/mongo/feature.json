@@ -1,0 +1,6 @@
+{"_id":{"$oid":"5e5283d6cfe4ef0dc6a973cc"},"featureText":"Использование современные препарати","featureIconText":"eco","_class":"am.hay.cc.model.Feature"}
+{"_id":{"$oid":"5e5283fdcfe4ef0dc6a973cd"},"featureText":"Минимальные сроки выполнения заказа","featureIconText":"speed","_class":"am.hay.cc.model.Feature"}
+{"_id":{"$oid":"5e52841bcfe4ef0dc6a973ce"},"featureText":"Современное оборудование","featureIconText":"done_outline","_class":"am.hay.cc.model.Feature"}
+{"_id":{"$oid":"5e528430cfe4ef0dc6a973cf"},"featureText":"Самые низкие цены","featureIconText":"trending_down","_class":"am.hay.cc.model.Feature"}
+{"_id":{"$oid":"5e528442cfe4ef0dc6a973d0"},"featureText":"Приём заказов 24/7","featureIconText":"av_timer","_class":"am.hay.cc.model.Feature"}
+{"_id":{"$oid":"5e528484cfe4ef0dc6a973d1"},"featureText":"Индивидуальный подход ","featureIconText":"how_to_reg ","_class":"am.hay.cc.model.Feature"}

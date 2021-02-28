@@ -1,0 +1,28 @@
+server:
+  ssl:
+    key-store: classpath:keystore.p12
+    key-store-password: 123456
+    key-store-type: pkcs12
+    key-alias: tomcat
+    key-password: 123456
+  port: 8443
+
+#mongodb
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: raym4n97@gmail.com
+    password: harut1998
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  data:
+    mongodb:
+      database: cc_be
+      host: localhost
+      port: 27017
+

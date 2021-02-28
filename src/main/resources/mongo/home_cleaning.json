@@ -1,0 +1,3 @@
+{"_id":{"$oid":"5e652c061b9cda3df947807f"},"title":"Обычная уборка","definition":"Обычная уборка","angularComponent":"basic-cleaning","pricePerSquare":"200","_class":"am.hay.cc.model.CleaningType"}
+{"_id":{"$oid":"5e652c1d1b9cda3df9478080"},"title":"Поддерживающая уборка","definition":"Поддерживающая уборка","angularComponent":"maintain-cleaning","pricePerSquare":"250","_class":"am.hay.cc.model.CleaningType"}
+{"_id":{"$oid":"5e652c291b9cda3df9478081"},"title":"Генеральная уборка","definition":"Генеральная уборка","angularComponent":"general-cleaning","pricePerSquare":"350","_class":"am.hay.cc.model.CleaningType"}

@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "server.spring.mail.username",
+      "type": "java.lang.String",
+      "description": "Description for server.spring.mail.username."
+  }
+] }

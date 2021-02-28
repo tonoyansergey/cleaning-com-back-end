@@ -1,0 +1,490 @@
+Index: src/main/resources/application.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/resources/application.yml	(revision 3fdc0f91727ca7312dddca979b970797cee5441c)
++++ src/main/resources/application.yml	(date 1584881026478)
+@@ -5,7 +5,7 @@
+     key-store-type: pkcs12
+     key-alias: tomcat
+     key-password: 123456
+-  port: 8443
++  port: 8081
+ 
+ #mongodb
+ spring:
+@@ -25,3 +25,4 @@
+       database: cc_be
+       host: localhost
+       port: 27017
++
+Index: src/main/resources/email.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/resources/email.properties	(revision 3fdc0f91727ca7312dddca979b970797cee5441c)
++++ src/main/resources/email.properties	(date 1584874363132)
+@@ -3,3 +3,4 @@
+ PORT=587
+ PASSWORD=harut1998
+ 
++
+Index: src/main/java/am/hay/cc/repository/CleaningDetailsRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/am/hay/cc/repository/CleaningDetailsRepository.java	(date 1584872665856)
++++ src/main/java/am/hay/cc/repository/CleaningDetailsRepository.java	(date 1584872665856)
+@@ -0,0 +1,9 @@
++package am.hay.cc.repository;
++
++import am.hay.cc.model.CleaningDetails;
++import org.springframework.data.mongodb.repository.MongoRepository;
++import org.springframework.stereotype.Repository;
++
++@Repository
++public interface CleaningDetailsRepository extends MongoRepository<CleaningDetails, String> {
++}
+Index: src/main/java/am/hay/cc/model/CleaningDetails.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/am/hay/cc/model/CleaningDetails.java	(date 1584878073321)
++++ src/main/java/am/hay/cc/model/CleaningDetails.java	(date 1584878073321)
+@@ -0,0 +1,58 @@
++package am.hay.cc.model;
++
++import org.springframework.data.annotation.Id;
++import org.springframework.data.mongodb.core.mapping.Document;
++
++import java.util.List;
++
++@Document(collection = "cleaning_details")
++public class CleaningDetails {
++
++    @Id
++    private String id;
++    private String category;
++    private String photo;
++    private List<String> text;
++
++    public CleaningDetails(String id, String category, String photo, List<String> text) {
++        this.id = id;
++        this.category = category;
++        this.photo = photo;
++        this.text = text;
++    }
++
++    public CleaningDetails() {
++    }
++
++    public String getId() {
++        return id;
++    }
++
++    public void setId(String id) {
++        this.id = id;
++    }
++
++    public String getCategory() {
++        return category;
++    }
++
++    public void setCategory(String category) {
++        this.category = category;
++    }
++
++    public String getPhoto() {
++        return photo;
++    }
++
++    public void setPhoto(String photo) {
++        this.photo = photo;
++    }
++
++    public List<String> getText() {
++        return text;
++    }
++
++    public void setText(List<String> text) {
++        this.text = text;
++    }
++}
+Index: src/main/java/am/hay/cc/service/PhotoService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/am/hay/cc/service/PhotoService.java	(date 1584872335252)
++++ src/main/java/am/hay/cc/service/PhotoService.java	(date 1584872335252)
+@@ -0,0 +1,58 @@
++package am.hay.cc.service;
++
++import org.springframework.stereotype.Service;
++import org.springframework.web.multipart.MultipartFile;
++
++import javax.servlet.ServletException;
++import javax.servlet.http.HttpServletRequest;
++import javax.servlet.http.Part;
++import java.io.File;
++import java.io.IOException;
++import java.util.logging.Level;
++import java.util.logging.Logger;
++
++@Service
++public class PhotoService {
++
++    private static final String UPLOAD_DIRECTORY = "upload";
++    private static final Logger LOGGER = Logger.getLogger(PhotoService.class.getCanonicalName());
++
++
++    public static String addPhoto(HttpServletRequest request, String key, MultipartFile file)
++            throws IOException, ServletException {
++
++        // gets absolute path of the web application
++        String appPath = request.getServletContext().getRealPath("");
++
++        // constructs path of the directory to save uploaded file
++        String savePath = appPath + UPLOAD_DIRECTORY;
++
++        // creates the save directory if it does not exists
++        File fileSaveDir = new File(savePath);
++        if (!fileSaveDir.exists()) {
++            fileSaveDir.mkdir();
++        }
++
++        for (Part part : request.getParts()) {
++            if (part.getName().equals(key)) {
++                String fileName = getFileName(part);
++                String filepat = UPLOAD_DIRECTORY + "/" + fileName;
++                part.write(savePath + File.separator + fileName);
++                return filepat;
++            }
++        }
++
++        return null;
++    }
++
++    private static String getFileName(final Part part) {
++        final String partHeader = part.getHeader("content-disposition");
++        LOGGER.log(Level.INFO, "Part Header = {0}", partHeader);
++        for (String content : part.getHeader("content-disposition").split(";")) {
++            if (content.trim().startsWith("filename")) {
++                return content.substring(content.indexOf('=') + 1).trim().replace("\"", "");
++            }
++        }
++        return null;
++    }
++}
+Index: src/main/java/am/hay/cc/app/CCApplication.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/am/hay/cc/app/CCApplication.java	(revision 3fdc0f91727ca7312dddca979b970797cee5441c)
++++ src/main/java/am/hay/cc/app/CCApplication.java	(date 1584879583546)
+@@ -2,10 +2,12 @@
+ 
+ import org.springframework.boot.SpringApplication;
+ import org.springframework.boot.autoconfigure.SpringBootApplication;
++import org.springframework.boot.autoconfigure.domain.EntityScan;
+ import org.springframework.context.annotation.ComponentScan;
+ import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+ 
+ @SpringBootApplication
++@EntityScan("am.hay.cc")
+ @ComponentScan(basePackages = "am.hay.cc")
+ @EnableMongoRepositories(basePackages = "am.hay.cc.repository")
+ public class CCApplication {
+Index: src/main/java/am/hay/cc/service/impl/EmailServiceImpl.java
+===================================================================
+--- src/main/java/am/hay/cc/service/impl/EmailServiceImpl.java	(revision 3fdc0f91727ca7312dddca979b970797cee5441c)
++++ src/main/java/am/hay/cc/email/impl/EmailServiceImpl.java	(date 1584879931458)
+@@ -1,9 +1,9 @@
+-package am.hay.cc.service.impl;
++package am.hay.cc.email.impl;
+ 
++import am.hay.cc.email.MailSenderManager;
+ import am.hay.cc.model.Order;
+ import am.hay.cc.service.CleaningTypeService;
+-import am.hay.cc.service.EmailService;
+-import am.hay.cc.service.MailSenderManager;
++import am.hay.cc.email.service.EmailService;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.context.annotation.PropertySource;
+ import org.springframework.stereotype.Service;
+Index: src/main/java/am/hay/cc/service/CleaningDetailsService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/am/hay/cc/service/CleaningDetailsService.java	(date 1584873273494)
++++ src/main/java/am/hay/cc/service/CleaningDetailsService.java	(date 1584873273494)
+@@ -0,0 +1,19 @@
++package am.hay.cc.service;
++
++import am.hay.cc.model.CleaningDetails;
++
++import java.util.List;
++
++public interface CleaningDetailsService {
++
++
++    List<CleaningDetails> findAll();
++
++    CleaningDetails save(final CleaningDetails cleaningDetails);
++
++    CleaningDetails updateById(final CleaningDetails cleaningDetails, final String id);
++
++    boolean deleteByID(final String id);
++
++    CleaningDetails findById(final String id);
++}
+Index: pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- pom.xml	(revision 3fdc0f91727ca7312dddca979b970797cee5441c)
++++ pom.xml	(date 1584878687911)
+@@ -16,12 +16,24 @@
+     <properties>
+         <java.version>1.8</java.version>
+         <model-mapper.version>2.3.2</model-mapper.version>
++        <kotlin.version>1.3.70</kotlin.version>
+     </properties>
+     <dependencies>
++
++        <dependency>
++            <groupId>org.springframework</groupId>
++            <artifactId>spring-context</artifactId>
++        </dependency>
++        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
++        <dependency>
++            <groupId>org.projectlombok</groupId>
++            <artifactId>lombok</artifactId>
++            <version>1.16.12</version>
++            <scope>provided</scope>
++        </dependency>
+         <dependency>
+             <groupId>org.springframework</groupId>
+             <artifactId>spring-context-support</artifactId>
+-            <version>5.0.1.RELEASE</version>
+         </dependency>
+         <dependency>
+             <groupId>org.springframework.boot</groupId>
+@@ -43,7 +55,6 @@
+         <dependency>
+             <groupId>org.springframework.boot</groupId>
+             <artifactId>spring-boot-starter-mail</artifactId>
+-            <version>2.0.1.RELEASE</version>
+         </dependency>
+         <dependency>
+             <groupId>org.springframework.boot</groupId>
+@@ -57,14 +68,4 @@
+             </exclusions>
+         </dependency>
+     </dependencies>
+-
+-    <build>
+-        <plugins>
+-            <plugin>
+-                <groupId>org.springframework.boot</groupId>
+-                <artifactId>spring-boot-maven-plugin</artifactId>
+-            </plugin>
+-        </plugins>
+-    </build>
+-
+ </project>
+Index: src/main/java/am/hay/cc/service/MailSenderManager.java
+===================================================================
+--- src/main/java/am/hay/cc/service/MailSenderManager.java	(revision 3fdc0f91727ca7312dddca979b970797cee5441c)
++++ src/main/java/am/hay/cc/email/MailSenderManager.java	(date 1584879931450)
+@@ -1,4 +1,4 @@
+-package am.hay.cc.service;
++package am.hay.cc.email;
+ 
+ import org.springframework.beans.factory.annotation.Value;
+ import org.springframework.context.annotation.PropertySource;
+Index: src/main/java/am/hay/cc/service/EmailService.java
+===================================================================
+--- src/main/java/am/hay/cc/service/EmailService.java	(revision 3fdc0f91727ca7312dddca979b970797cee5441c)
++++ src/main/java/am/hay/cc/email/service/EmailService.java	(date 1584879931431)
+@@ -1,4 +1,4 @@
+-package am.hay.cc.service;
++package am.hay.cc.email.service;
+ 
+ import am.hay.cc.model.Order;
+ 
+Index: src/main/java/am/hay/cc/service/impl/CleaningDetailsServiceImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/am/hay/cc/service/impl/CleaningDetailsServiceImpl.java	(date 1584873273505)
++++ src/main/java/am/hay/cc/service/impl/CleaningDetailsServiceImpl.java	(date 1584873273505)
+@@ -0,0 +1,59 @@
++package am.hay.cc.service.impl;
++
++import am.hay.cc.exception.PersistFailureException;
++import am.hay.cc.exception.RecordNotFoundException;
++import am.hay.cc.model.CleaningDetails;
++import am.hay.cc.repository.CleaningDetailsRepository;
++import am.hay.cc.service.CleaningDetailsService;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.stereotype.Service;
++
++import java.util.List;
++import java.util.Optional;
++
++@Service
++public class CleaningDetailsServiceImpl implements CleaningDetailsService {
++
++    private final CleaningDetailsRepository cleaningDetailsRepository;
++
++    @Autowired
++    public CleaningDetailsServiceImpl(final CleaningDetailsRepository cleaningDetailsRepository) {
++        this.cleaningDetailsRepository = cleaningDetailsRepository;
++    }
++
++    @Override
++    public List<CleaningDetails> findAll() {
++        return cleaningDetailsRepository.findAll();
++    }
++
++    @Override
++    public CleaningDetails save(final CleaningDetails cleaningDetails) {
++        return Optional.of(cleaningDetailsRepository.save(cleaningDetails)).orElseThrow(() -> new RecordNotFoundException("Persist not succeed"));
++    }
++
++    @Override
++    public CleaningDetails updateById(final CleaningDetails cleaningDetails, final String id) {
++        return cleaningDetailsRepository.findById(id).
++                map(existingUser -> {
++                    cleaningDetails.setId(existingUser.getId());
++                    existingUser = cleaningDetails;
++                    return cleaningDetailsRepository.save(existingUser);
++                }).orElseThrow(() -> new PersistFailureException("Persist not succeed"));
++    }
++
++    @Override
++    public boolean deleteByID(final String id) {
++        try {
++            cleaningDetailsRepository.deleteById(id);
++            return true;
++        } catch (Exception e) {
++            return false;
++        }
++
++    }
++
++    @Override
++    public CleaningDetails findById(final String id) {
++        return cleaningDetailsRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("Feature record not found"));
++    }
++}
+Index: src/main/resources/io.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/resources/io.properties	(date 1584876648123)
++++ src/main/resources/io.properties	(date 1584876648123)
+@@ -0,0 +1,5 @@
++ROOTLOCATION = upload-dir
++
++BASE_URL = upload-dir
++
++
+Index: src/main/java/am/hay/cc/controller/CleaningDetailsController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/am/hay/cc/controller/CleaningDetailsController.java	(date 1584898436434)
++++ src/main/java/am/hay/cc/controller/CleaningDetailsController.java	(date 1584898436434)
+@@ -0,0 +1,55 @@
++package am.hay.cc.controller;
++
++import am.hay.cc.io.interfaces.FileIOInterface;
++import am.hay.cc.model.CleaningDetails;
++import am.hay.cc.service.CleaningDetailsService;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.http.HttpStatus;
++import org.springframework.http.ResponseEntity;
++import org.springframework.web.bind.annotation.*;
++import org.springframework.web.multipart.MultipartFile;
++
++import java.io.IOException;
++import java.util.List;
++
++@RestController
++@RequestMapping("/cliningdetails")
++public class CleaningDetailsController {
++
++    private CleaningDetailsService cleaningDetailsService;
++
++
++    @Autowired
++    public CleaningDetailsController(CleaningDetailsService cleaningDetailsService) {
++        this.cleaningDetailsService = cleaningDetailsService;
++
++    }
++
++    @GetMapping("")
++    public ResponseEntity<List<CleaningDetails>> getAllCleaningDetails() {
++        return new ResponseEntity<>(cleaningDetailsService.findAll(), HttpStatus.OK);
++    }
++
++    @GetMapping(value = "/{id}")
++    public ResponseEntity<CleaningDetails> getCleaningDetailsById(@PathVariable(value = "id") final String id) {
++        return new ResponseEntity<>(cleaningDetailsService.findById(id), HttpStatus.OK);
++    }
++
++    @PostMapping("/add")
++    public ResponseEntity<CleaningDetails> addCleaningDetails(@RequestParam("image") MultipartFile image,
++                                                              @RequestBody CleaningDetails cleaningDetails) throws IOException {
++        return new ResponseEntity<>(cleaningDetailsService.save(cleaningDetails), HttpStatus.OK);
++    }
++
++    @PutMapping(value = "/update/{id}")
++    public ResponseEntity<?> updateCleaningDetails(@PathVariable(name = "id") final String id, @RequestBody final CleaningDetails cleaningDetails) {
++        return new ResponseEntity<>(cleaningDetailsService.updateById(cleaningDetails, id), HttpStatus.OK);
++    }
++
++
++    @DeleteMapping(value = "/delete/{id}")
++    public ResponseEntity<?> deleteCleaningDetails(@PathVariable(name = "id") final String id) {
++        return new ResponseEntity<>(cleaningDetailsService.deleteByID(id), HttpStatus.OK);
++    }
++
++}
+Index: src/main/java/am/hay/cc/controller/OrderController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/am/hay/cc/controller/OrderController.java	(revision 3fdc0f91727ca7312dddca979b970797cee5441c)
++++ src/main/java/am/hay/cc/controller/OrderController.java	(date 1584879931394)
+@@ -1,7 +1,7 @@
+ package am.hay.cc.controller;
+ 
+ import am.hay.cc.model.Order;
+-import am.hay.cc.service.EmailService;
++import am.hay.cc.email.service.EmailService;
+ import am.hay.cc.service.OrderService;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.http.HttpStatus;
+@@ -37,7 +37,7 @@
+ 
+     @PostMapping("/add")
+     public ResponseEntity<Order> addOrder(@RequestBody final Order order) {
+-        emailService.sendSimpleMessage("tonoyan.sergey.s@gmail.com", order, "hello");
++        emailService.sendSimpleMessage("ghazaryan.gevor97@outlook.com", order, "hello");
+         return new ResponseEntity<>(orderService.save(order), HttpStatus.OK);
+     }
+ 
